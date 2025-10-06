@@ -1,0 +1,133 @@
+name: DolphinTrainerPro
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - name
+      - name: email
+        type: email
+      - name: role
+        type: choice
+        options:
+          values: [admin, trainer]
+        default: trainer
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: restricted
+          allow: User
+          condition: self
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: admin
+      signup:
+        - access: public
+
+  Dolphin:
+    properties:
+      - name: name
+        type: string
+      - name: species
+        type: string
+      - name: birthDate
+        type: date
+      - name: photo
+        type: image
+        options:
+          sizes:
+            thumbnail:
+              width: 200
+              height: 200
+            profile:
+              width: 400
+    belongsTo:
+      - name: trainer
+        entity: User
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: restricted
+          allow: User
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: restricted
+          allow: User
+          condition: self
+
+  Skill:
+    properties:
+      - name: name
+        type: string
+      - name: description
+        type: text
+      - name: difficulty
+        type: choice
+        options:
+          values: [easy, medium, hard]
+    policies:
+      create:
+        - access: admin
+      read:
+        - access: restricted
+          allow: User
+      update:
+        - access: admin
+      delete:
+        - access: admin
+
+  TrainingSession:
+    properties:
+      - name: sessionDate
+        type: timestamp
+        default: now
+      - name: durationMinutes
+        type: number
+      - name: notes
+        type: richText
+      - name: performanceRating
+        type: choice
+        options:
+          values: [learning, inconsistent, consistent, mastered]
+    belongsTo:
+      - name: dolphin
+        entity: Dolphin
+      - name: trainer
+        entity: User
+    belongsToMany:
+      - name: skillsPracticed
+        entity: Skill
+    policies:
+      create:
+        - access: restricted
+          allow: User
+      read:
+        - access: restricted
+          allow: User
+          condition: self
+      update:
+        - access: restricted
+          allow: User
+          condition: self
+      delete:
+        - access: restricted
+          allow: User
+          condition: self
+
+
+# Health check endpoint for connection testing
+endpoints:
+  health:
+    path: /api/health
+    method: GET
+    policies: []
+    handler: healthCheck
